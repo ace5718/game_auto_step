@@ -1,15 +1,22 @@
+// src/app/simulator/page.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import SimulatorList from '../../components/simulator/SimulatorList';
 import Link from 'next/link';
-import { Input, Button, Card } from '@radix-ui/react';
 
 const SimulatorListPage = () => {
-  const [simulators, setSimulators] = useState<{ id: number; name: string; status: string }[]>([]);
+  // 定義模擬器類型
+  type Simulator = {
+    id: number;
+    name: string;
+    status: string;
+  };
+
+  const [simulators, setSimulators] = useState<Simulator[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const router = useRouter();
 
   useEffect(() => {
@@ -22,14 +29,17 @@ const SimulatorListPage = () => {
     setSimulators(fakeSimulators);
   }, []);
 
+  // 處理搜尋
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
+  // 處理排序
   const handleSort = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
+  // 過濾和排序模擬器
   const filteredSimulators = simulators
     .filter((simulator) =>
       simulator.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -42,30 +52,53 @@ const SimulatorListPage = () => {
       }
     });
 
+  // 處理模擬器點擊
   const handleSimulatorClick = (id: number) => {
     router.push(`/simulator/${id}`);
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">模擬器列表</h1>
-      <Input
-        placeholder="搜尋模擬器"
-        value={searchTerm}
-        onChange={handleSearch}
-        className="mb-4 p-2 border rounded"
-      />
-      <Button onClick={handleSort} className="mb-4 p-2 bg-blue-500 text-white rounded">
-        排序 {sortOrder === 'asc' ? '升序' : '降序'}
-      </Button>
-      <Card className="p-4 border rounded">
-        <SimulatorList simulators={filteredSimulators} onSimulatorClick={handleSimulatorClick} />
-      </Card>
-      <Link href="/simulator/new">
-        <Button className="mt-4 p-2 bg-green-500 text-white rounded">
+    <div className="space-y-6">
+      {/* 頁面標題 */}
+      <div className="border-b pb-4">
+        <h1 className="text-2xl font-bold">模擬器列表</h1>
+      </div>
+
+      {/* 搜尋和排序區域 */}
+      <div className="flex gap-4 items-center">
+        <input
+          type="text"
+          placeholder="搜尋模擬器"
+          value={searchTerm}
+          onChange={handleSearch}
+          className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          onClick={handleSort}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+        >
+          排序 {sortOrder === 'asc' ? '↑' : '↓'}
+        </button>
+      </div>
+
+      {/* 模擬器列表區域 */}
+      <div className="bg-white shadow-sm rounded-lg border p-6">
+        <SimulatorList 
+          simulators={filteredSimulators} 
+          onSimulatorClick={handleSimulatorClick} 
+        />
+      </div>
+
+      {/* 新增模擬器按鈕 */}
+      <div className="flex justify-end">
+        <Link 
+          href="/simulator/new"
+          className="inline-flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+        >
+          <span className="mr-2">+</span>
           新增模擬器
-        </Button>
-      </Link>
+        </Link>
+      </div>
     </div>
   );
 };
